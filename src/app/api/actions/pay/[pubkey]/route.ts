@@ -2,8 +2,8 @@ import {
   ActionPostResponse,
   createPostResponse,
   ActionGetResponse,
-  ActionPostRequest,
   ACTIONS_CORS_HEADERS,
+  ActionPostRequest,
 } from "@solana/actions";
 import {
   clusterApiUrl,
@@ -22,10 +22,10 @@ export const GET = async (req: Request) => {
   try {
     const { pathname } = new URL(req.url);
     const pathSegments = pathname.split("/");
-    const orgPublicKey = decodeURIComponent(pathSegments[4]); // Extract the organization public key from the URL
+    const pubkey = pathSegments[4]; // Extract the pubkey from the URL
 
     // Fetch organization details from the database using the OrgBlink schema
-    const orgDetails = await OrgBlink.findOne({ orgPubKey: orgPublicKey });
+    const orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey });
 
     if (!orgDetails) {
       return new Response("Organization not found", {
@@ -43,7 +43,7 @@ export const GET = async (req: Request) => {
         actions: [
           {
             label: "Subscribe Now",
-            href: `/api/actions/pay?name={name}&email={email}&amount={amount}`,
+            href: `/api/actions/pay/${pubkey}?name={name}&email={email}&amount={amount}`,
             parameters: [
               {
                 type: "text",
@@ -95,14 +95,23 @@ export const GET = async (req: Request) => {
   }
 };
 
-export const OPTIONS = GET;
+export const OPTIONS = async (req: Request) => {
+  return new Response(null, {
+    status: 204, // No Content
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+};
 
 export const POST = async (req: Request) => {
   try {
     const body = await req.json();
     const userPubkey = new PublicKey(body.account);
     const url = new URL(req.url);
-    const orgPublicKey = url.searchParams.get("orgPubKey") ?? "";
+    const pubkey = url.pathname.split("/")[4]; // Extract the pubkey from the URL
     const name = url.searchParams.get("name") ?? "";
     const email = url.searchParams.get("email") ?? "";
     const amount = url.searchParams.get("amount") ?? "0";
@@ -112,7 +121,7 @@ export const POST = async (req: Request) => {
     const amountNumber = parseFloat(amount);
 
     // Fetch organization details
-    const orgDetails = await OrgBlink.findOne({ orgPubKey: orgPublicKey });
+    const orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey });
 
     if (!orgDetails) {
       return new Response("Organization not found", { status: 404 });
@@ -131,10 +140,10 @@ export const POST = async (req: Request) => {
     // Save user subscription details
     const newUser = new UserBlink({
       name,
-      orgname:orgDetails.name,
+      orgname: orgDetails.name,
       email,
-      publicKey: userPubkey.toString(),
-      subscriptionType,
+      UserPubKey: userPubkey.toString(),
+      duration: subscriptionType,
       amount: parseFloat(amount),
     });
 
@@ -145,7 +154,7 @@ export const POST = async (req: Request) => {
       SystemProgram.transfer({
         fromPubkey: userPubkey,
         lamports: amountInLamports,
-        toPubkey: new PublicKey(orgPublicKey),
+        toPubkey: new PublicKey(pubkey),
       })
     );
 
@@ -155,18 +164,20 @@ export const POST = async (req: Request) => {
     ).blockhash;
 
     // Create response payload
-    const payload = {
-      transaction,
-      message: `Thanks ${name} (${email}) for subscribing to ${
-        subscriptionType === "year" ? "1 Year" : "1 Month"
-      }`,
-    };
+    const payload: ActionPostResponse = await createPostResponse({
+      fields: {
+        transaction,
+        message: `Thanks ${name} (${email}) for subscribing to ${
+          subscriptionType === "year" ? "1 Year" : "1 Month"
+        }`,
+      },
+    });
 
     return new Response(JSON.stringify(payload), {
       headers: ACTIONS_CORS_HEADERS,
     });
   } catch (error) {
-    console.error("Error processing POST request:");
+    console.error("Error processing POST request:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process request" }),
       {
