@@ -16,21 +16,32 @@ import {
 import { OrgBlink } from "../../../../(mongo)/OrgSchema"; // Import your OrgBlink model
 import { UserBlink } from "../../../../(mongo)/userSchema"; // Import your UserBlink model
 
+// Initialize Solana connection once to avoid repeated creation
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+
+// Simple in-memory cache for organization details
+const orgCache = new Map<string, any>();
 
 export const GET = async (req: Request) => {
   try {
     const { pathname } = new URL(req.url);
-    const pathSegments = pathname.split("/");
-    const pubkey = pathSegments[4]; // Extract the pubkey from the URL
+    const pubkey = pathname.split("/")[4]; // Extract the pubkey from the URL
 
-    // Fetch organization details from the database using the OrgBlink schema
-    const orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey });
+    // Try to fetch organization details from cache
+    let orgDetails = orgCache.get(pubkey);
 
+    // If not in cache, fetch from database and store in cache
     if (!orgDetails) {
-      return new Response("Organization not found", {
-        status: 404,
-      });
+      orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey })
+        .select("name month year")
+        .lean()
+        .exec();
+
+      if (!orgDetails) {
+        return new Response("Organization not found", { status: 404 });
+      }
+
+      orgCache.set(pubkey, orgDetails);
     }
 
     // Create the response payload
@@ -111,11 +122,19 @@ export const POST = async (req: Request) => {
     const amountInLamports = parseFloat(amount) * LAMPORTS_PER_SOL;
     const amountNumber = parseFloat(amount);
 
-    // Fetch organization details
-    const orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey });
-
+    // Fetch organization details from cache or database
+    let orgDetails = orgCache.get(pubkey);
     if (!orgDetails) {
-      return new Response("Organization not found", { status: 404 });
+      orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey })
+        .select("name month year")
+        .lean()
+        .exec();
+
+      if (!orgDetails) {
+        return new Response("Organization not found", { status: 404 });
+      }
+
+      orgCache.set(pubkey, orgDetails);
     }
 
     // Determine subscription type
@@ -135,7 +154,7 @@ export const POST = async (req: Request) => {
       email,
       UserPubKey: userPubkey.toString(),
       duration: subscriptionType,
-      amount: parseFloat(amount),
+      amount: amountNumber,
     });
 
     await newUser.save();
