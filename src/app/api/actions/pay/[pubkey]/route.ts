@@ -13,8 +13,8 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import { OrgBlink } from "../../../../(mongo)/OrgSchema"; // Import your OrgBlink model
-import { UserBlink } from "../../../../(mongo)/userSchema"; // Import your UserBlink model
+import OrgData from "../../../../(mongo)/OrgSchema"; // Import your OrgData model
+import userBlink from "../../../../(mongo)/userSchema"; // Import your UserBlink model
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
@@ -22,10 +22,9 @@ export const GET = async (req: Request) => {
   try {
     const { pathname } = new URL(req.url);
     const pathSegments = pathname.split("/");
-    const pubkey = pathSegments[4]; // Extract the pubkey from the URL
+    const OrgID = pathSegments[4]; 
 
-    // Fetch organization details from the database using the OrgBlink schema
-    const orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey });
+    const orgDetails = await OrgData.findOne({ org: OrgID });
 
     if (!orgDetails) {
       return new Response("Organization not found", {
@@ -43,7 +42,7 @@ export const GET = async (req: Request) => {
         actions: [
           {
             label: "Subscribe Now",
-            href: `/api/actions/pay/${pubkey}?name={name}&email={email}&amount={amount}`,
+            href: `/api/actions/pay/${OrgID}?name={name}&email={email}&amount={amount}`,
             parameters: [
               {
                 type: "text",
@@ -102,7 +101,7 @@ export const POST = async (req: Request) => {
     const body = await req.json();
     const userPubkey = new PublicKey(body.account);
     const url = new URL(req.url);
-    const pubkey = url.pathname.split("/")[4]; // Extract the pubkey from the URL
+    const OrgID = url.pathname.split("/")[4]; // Extract the pubkey from the URL
     const name = url.searchParams.get("name") ?? "";
     const email = url.searchParams.get("email") ?? "";
     const amount = url.searchParams.get("amount") ?? "0";
@@ -112,7 +111,7 @@ export const POST = async (req: Request) => {
     const amountNumber = parseFloat(amount);
 
     // Fetch organization details
-    const orgDetails = await OrgBlink.findOne({ orgPubKey: pubkey });
+    const orgDetails = await OrgData.findOne({ org: OrgID });
 
     if (!orgDetails) {
       return new Response("Organization not found", { status: 404 });
@@ -129,9 +128,9 @@ export const POST = async (req: Request) => {
     }
 
     // Save user subscription details
-    const newUser = new UserBlink({
+    const newUser = new userBlink({
       name,
-      orgname: orgDetails.name,
+      orgId: orgDetails.org,
       email,
       UserPubKey: userPubkey.toString(),
       duration: subscriptionType,
@@ -145,7 +144,7 @@ export const POST = async (req: Request) => {
       SystemProgram.transfer({
         fromPubkey: userPubkey,
         lamports: amountInLamports,
-        toPubkey: new PublicKey(pubkey),
+        toPubkey: new PublicKey(orgDetails.orgPubKey),
       })
     );
 
