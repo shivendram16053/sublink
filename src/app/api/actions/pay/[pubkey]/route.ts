@@ -95,16 +95,7 @@ export const GET = async (req: Request) => {
   }
 };
 
-export const OPTIONS = async (req: Request) => {
-  return new Response(null, {
-    status: 204, // No Content
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
-};
+export const OPTIONS = GET;
 
 export const POST = async (req: Request) => {
   try {
