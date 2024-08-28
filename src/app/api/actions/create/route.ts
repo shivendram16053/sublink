@@ -22,7 +22,7 @@ const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
 const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
-export async function GET(req: NextRequest) {
+export const GET= async(req: NextRequest) =>{
   
   const payload: ActionGetResponse = {
     icon: new URL("/logo.png", new URL(req.url).origin).toString(),
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 // ensures CORS
 export const OPTIONS = GET;
 
-export async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest) =>{
   try {
     await connectToDatabase();
 
