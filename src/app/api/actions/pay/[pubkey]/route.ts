@@ -38,7 +38,7 @@ export const GET = async (req: Request) => {
 
     // Create the response payload
     const payload: ActionGetResponse = {
-      icon: new URL("/logo.png", new URL(req.url).origin).toString(),
+      icon: "https://subslink.vercel.app/logo.png",
       title: `Subscribe to ${orgDetails.name}`,
       description: `Subscribe to ${orgDetails.name} on Solana.`,
       label: "Subscribe Now",

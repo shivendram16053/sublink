@@ -22,7 +22,7 @@ const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
 export const GET = async (req: NextRequest) => {
   const payload: ActionGetResponse = {
-    icon: new URL("/logo.png", new URL(req.url).origin).toString(),
+    icon: "https://subslink.vercel.app/logo.png",
     title: "Create your own subscription Blink",
     description:
       "Enter the details of your organisation/business/project to create a blink",
