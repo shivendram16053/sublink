@@ -17,6 +17,8 @@ import OrgData from "../../../../(mongo)/OrgSchema"; // Import your OrgData mode
 import userBlink from "../../../../(mongo)/userSchema"; // Import your UserBlink model
 import { NextResponse } from "next/server";
 import { getUserAction, saveUserData } from "../../helper";
+import { connectToDatabase } from "../../../../(mongo)/db"; // adjust the path as necessary
+
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
@@ -100,6 +102,9 @@ export const OPTIONS = GET;
 
 export const POST = async (req: Request) => {
   try {
+
+    await connectToDatabase();
+
     const body = (await req.json()) as { account: string; signature: string };
     const userPubkey = new PublicKey(body.account);
     const url = new URL(req.url);
