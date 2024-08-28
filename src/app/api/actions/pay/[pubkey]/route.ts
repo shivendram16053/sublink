@@ -15,6 +15,8 @@ import {
 } from "@solana/web3.js";
 import OrgData from "../../../../(mongo)/OrgSchema"; // Import your OrgData model
 import userBlink from "../../../../(mongo)/userSchema"; // Import your UserBlink model
+import { NextResponse } from "next/server";
+import { getUserAction, saveUserData } from "../../helper";
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
@@ -98,13 +100,14 @@ export const OPTIONS = GET;
 
 export const POST = async (req: Request) => {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as { account: string; signature: string };
     const userPubkey = new PublicKey(body.account);
     const url = new URL(req.url);
     const OrgID = url.pathname.split("/")[4]; // Extract the pubkey from the URL
     const name = url.searchParams.get("name") ?? "";
     const email = url.searchParams.get("email") ?? "";
     const amount = url.searchParams.get("amount") ?? "0";
+    const stage = url.searchParams.get("stage");
 
     // Convert the amount to lamports
     const amountInLamports = parseFloat(amount) * LAMPORTS_PER_SOL;
@@ -127,23 +130,15 @@ export const POST = async (req: Request) => {
       return new Response("Invalid subscription amount", { status: 400 });
     }
 
-    // Save user subscription details
-    const newUser = new userBlink({
-      name,
-      orgId: orgDetails.org,
-      email,
-      UserPubKey: userPubkey.toString(),
-      duration: subscriptionType,
-      amount: parseFloat(amount),
-    });
+    const type = subscriptionType =="month"?"Monthly Plan" : "Yearly Plan"
 
-    await newUser.save();
+    
 
     // Create the transaction
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: userPubkey,
-        lamports: amountInLamports,
+        lamports: amountInLamports/2,
         toPubkey: new PublicKey(orgDetails.orgPubKey),
       })
     );
@@ -153,13 +148,44 @@ export const POST = async (req: Request) => {
       await connection.getLatestBlockhash()
     ).blockhash;
 
+    if(stage){
+      const newUser = new userBlink({
+        name,
+        orgId: orgDetails.org,
+        email,
+        UserPubKey: userPubkey.toString(),
+        duration: subscriptionType,
+        amount: parseFloat(amount),
+      });
+  
+      await newUser.save();
+
+      return NextResponse.json(
+        await createPostResponse({
+          fields: {
+            links: {
+              next: getUserAction(name,email,type,orgDetails.name),
+            },
+            transaction,
+            message: `Blink created`,
+          },
+        }),
+        {
+          headers: ACTIONS_CORS_HEADERS,
+        }
+      );
+    }
+
+    const nextActionLink = await saveUserData(name, email, type, body.account, amountNumber,OrgID);
+
     // Create response payload
     const payload: ActionPostResponse = await createPostResponse({
       fields: {
         transaction,
-        message: `Thanks ${name} (${email}) for subscribing to ${
-          subscriptionType === "year" ? "1 Year" : "1 Month"
-        }`,
+        message: "Please sign the transaction to complete the process.",
+        links:{
+          next:nextActionLink,
+        }
       },
     });
 

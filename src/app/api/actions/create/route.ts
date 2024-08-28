@@ -5,24 +5,20 @@ import {
   SystemProgram,
   Connection,
   clusterApiUrl,
-  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import {
   ACTIONS_CORS_HEADERS,
   createPostResponse,
   ActionGetResponse,
-  ActionPostResponse,
-  createActionHeaders,
 } from "@solana/actions";
 import { connectToDatabase } from "../../../(mongo)/db"; // adjust the path as necessary
-import { customAlphabet, random } from "nanoid";
+import { customAlphabet } from "nanoid";
 import { getCompletedAction, saveOrgData } from "../helper";
 import OrgData from "@/app/(mongo)/OrgSchema";
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
 const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
-const headers = createActionHeaders();
 
 export const GET = async (req: NextRequest) => {
   const payload: ActionGetResponse = {
@@ -68,8 +64,8 @@ export const GET = async (req: NextRequest) => {
   });
 };
 
-// ensures CORS
-export const OPTIONS = async () => Response.json(null, { headers });
+// Add OPTIONS handler for CORS
+export const OPTIONS = GET;
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -84,12 +80,13 @@ export const POST = async (req: NextRequest) => {
     const randomId = generateRandomId();
     const orgKey = body.account;
     const orgPubKey = new PublicKey(orgKey);
+    const stage = searchParams.get("stage");
 
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: orgPubKey,
         toPubkey: new PublicKey(MY_PUB_KEY),
-        lamports: 10000000, // Example value, replace with your logic
+        lamports: 10000000 / 2, // Example value, replace with your logic
       })
     );
 
@@ -98,8 +95,7 @@ export const POST = async (req: NextRequest) => {
       await connection.getLatestBlockhash()
     ).blockhash;
 
-    // Check if the transaction was already signed and completed
-    if (body.signature) {
+    if (stage) {
       const newBlink = new OrgData({
         org: randomId,
         name,
@@ -127,7 +123,6 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    console.log("transaction signed");
 
     const nextActionLink = await saveOrgData(name, email, month, year, orgKey);
 
