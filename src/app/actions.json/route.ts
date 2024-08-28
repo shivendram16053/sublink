@@ -1,6 +1,6 @@
 import { ACTIONS_CORS_HEADERS, ActionsJson } from "@solana/actions";
 
-export const GET = async (req: Request) => {
+export const GET = async () => {
   const payload: ActionsJson = {
     rules: [
       {
