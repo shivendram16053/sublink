@@ -1,35 +1,33 @@
+import { NextRequest, NextResponse } from "next/server";
 import {
-  ActionPostResponse,
-  createPostResponse,
-  ActionPostRequest,
-  ACTIONS_CORS_HEADERS,
-  ActionGetResponse,
-} from "@solana/actions";
-import {
-  clusterApiUrl,
-  Connection,
-  LAMPORTS_PER_SOL,
+  Transaction,
   PublicKey,
   SystemProgram,
-  Transaction,
-  sendAndConfirmTransaction,
+  Connection,
+  clusterApiUrl,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
+import {
+  ACTIONS_CORS_HEADERS,
+  createPostResponse,
+  ActionGetResponse,
+  ActionPostResponse,
+} from "@solana/actions";
 import { connectToDatabase } from "../../../(mongo)/db"; // adjust the path as necessary
 import OrgData from "../../../(mongo)/OrgSchema";
 import { customAlphabet } from "nanoid";
-
-const number = 'abcdefghijklmnopqrstuvwxyz';
-const generateRandomId = customAlphabet(number, 8);
+import { getCompletedAction } from "../helper";
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
+const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
-export const GET = async (req: Request) => {
+export async function GET(req: NextRequest) {
+  
   const payload: ActionGetResponse = {
     icon: new URL("/logo.png", new URL(req.url).origin).toString(),
     title: "Create your own subscription Blink",
-    description:
-      "Enter the details of your organisation/business/project to create a blink",
+    description: "Enter the details of your organisation/business/project to create a blink",
     label: "Create One",
     links: {
       actions: [
@@ -38,24 +36,9 @@ export const GET = async (req: Request) => {
           href: "/api/actions/create?name={name}&email={email}&month={month}&year={year}",
           parameters: [
             { type: "text", name: "name", label: "Enter Name", required: true },
-            {
-              type: "email",
-              name: "email",
-              label: "Enter Email",
-              required: true,
-            },
-            {
-              type: "number",
-              name: "month",
-              label: "Enter Monthly Price",
-              required: true,
-            },
-            {
-              type: "number",
-              name: "year",
-              label: "Enter Yearly Price",
-              required: true,
-            },
+            { type: "email", name: "email", label: "Enter Email", required: true },
+            { type: "number", name: "month", label: "Enter Monthly Price", required: true },
+            { type: "number", name: "year", label: "Enter Yearly Price", required: true },
           ],
         },
       ],
@@ -63,63 +46,86 @@ export const GET = async (req: Request) => {
     type: "action",
   };
 
-  return Response.json(payload, {
+  return NextResponse.json(payload, {
     headers: ACTIONS_CORS_HEADERS,
   });
-};
+}
 
+// ensures CORS
 export const OPTIONS = GET;
 
-export const POST = async (req: Request) => {
+export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase(); // Connect to MongoDB
+    await connectToDatabase();
 
-    const body: ActionPostRequest = await req.json();
-    const orgPubKey = body.account;
-    const url = new URL(req.url);
-    const name = url.searchParams.get("name") ?? "";
-    const email = url.searchParams.get("email") ?? "";
-    const month = parseFloat(url.searchParams.get("month") ?? "0");
-    const year = parseFloat(url.searchParams.get("year") ?? "0");
+    const body = (await req.json()) as { account: string; signature: string };
+    const { searchParams } = new URL(req.url);
+    const name = searchParams.get("name") ?? "";
+    const email = searchParams.get("email") ?? "";
+    const month = parseFloat(searchParams.get("month") ?? "0");
+    const year = parseFloat(searchParams.get("year") ?? "0");
     const randomId = generateRandomId();
+    const orgPubKey = new PublicKey(body.account);
 
-    // Create the transaction
     const transaction = new Transaction().add(
       SystemProgram.transfer({
-        fromPubkey: new PublicKey(orgPubKey),
-        lamports: 10000000,
+        fromPubkey: orgPubKey,
         toPubkey: new PublicKey(MY_PUB_KEY),
+        lamports: 10000000, // Example value, replace with your logic
       })
     );
 
-    transaction.feePayer = new PublicKey(orgPubKey);
+    transaction.feePayer = orgPubKey;
     transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
+    // Check if the transaction was already signed and completed
+    if (body.signature) {
 
+      console.log(" is done")
+      // Save the data to MongoDB after transaction confirmation
+      const newBlink = new OrgData({
+        name,
+        org: randomId,
+        email,
+        month,
+        year,
+        orgPubKey: body.account,
+      });
 
-    // Save user subscription details after the transaction is confirmed
-    const newBlink = new OrgData({
-      name,
-      org: randomId,
-      email,
-      month,
-      year,
-      orgPubKey,
-    });
+      await newBlink.save();
 
-    await newBlink.save();
-    
+      console.log("data saved")
 
-    // Create response payload
-    const payload: ActionPostResponse = await createPostResponse({
+      return NextResponse.json(
+        await createPostResponse({
+          fields: {
+            links: {
+              next: getCompletedAction(randomId),
+            },
+            transaction,
+            message: `Blink created`,
+          },
+        }),
+        {
+          headers: ACTIONS_CORS_HEADERS,
+        }
+      );
+    }
+
+    console.log("trnasaction sgined")
+    // If not signed, return the transaction for the user to sign
+    const payload = await createPostResponse({
       fields: {
         transaction,
-        message: `Your Blink is: /pay/${randomId}`,
+        message: "Please sign the transaction to complete the process.",
+        links: {
+          next: {
+            type: "post",
+            href: `/api/actions/create?name=${name}&email=${email}&month=${month}&year=${year}&randomId=${randomId}`,
+          },
+        },
       },
     });
-
-
-    
 
     return new Response(JSON.stringify(payload), {
       headers: ACTIONS_CORS_HEADERS,
@@ -134,4 +140,4 @@ export const POST = async (req: Request) => {
       }
     );
   }
-};
+}
