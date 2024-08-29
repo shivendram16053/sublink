@@ -15,13 +15,15 @@ import { connectToDatabase } from "../../../(mongo)/db"; // adjust the path as n
 import { customAlphabet } from "nanoid";
 import { getCompletedAction, saveOrgData } from "../helper";
 import OrgData from "@/app/(mongo)/OrgSchema";
+import { BlinksightsClient } from 'blinksights-sdk';
 
+const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0eece48af9b40a857306e1c');
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
 const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
 export const GET = async (req: NextRequest) => {
-  const payload: ActionGetResponse = {
+  const payload = client.createActionGetResponseV1(req.url, {
     icon: "https://subslink.vercel.app/logo.png",
     title: "Create your own subscription Blink",
     description:
@@ -57,9 +59,9 @@ export const GET = async (req: NextRequest) => {
       ],
     },
     type: "action",
-  };
+  }) as ActionGetResponse;
 
-  return NextResponse.json(payload, {
+  return new Response(JSON.stringify(payload), {
     headers: ACTIONS_CORS_HEADERS,
   });
 };
@@ -86,7 +88,7 @@ export const POST = async (req: NextRequest) => {
       SystemProgram.transfer({
         fromPubkey: orgPubKey,
         toPubkey: new PublicKey(MY_PUB_KEY),
-        lamports: 10000000 / 2, // Example value, replace with your logic
+        lamports: 10000000 / 2, 
       })
     );
 

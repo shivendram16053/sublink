@@ -18,6 +18,9 @@ import userBlink from "../../../../(mongo)/userSchema"; // Import your UserBlink
 import { NextResponse } from "next/server";
 import { getUserAction, saveUserData } from "../../helper";
 import { connectToDatabase } from "../../../../(mongo)/db"; // adjust the path as necessary
+import { BlinksightsClient } from 'blinksights-sdk';
+
+const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0eece48af9b40a857306e1c');
 
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -37,7 +40,7 @@ export const GET = async (req: Request) => {
     }
 
     // Create the response payload
-    const payload: ActionGetResponse = {
+    const payload =client.createActionGetResponseV1(req.url, {
       icon: "https://subslink.vercel.app/logo.png",
       title: `Subscribe to ${orgDetails.name}`,
       description: `Subscribe to ${orgDetails.name} on Solana.`,
@@ -81,7 +84,7 @@ export const GET = async (req: Request) => {
         ],
       },
       type: "action",
-    };
+    }) as ActionGetResponse;
 
     return new Response(JSON.stringify(payload), {
       headers: ACTIONS_CORS_HEADERS,
@@ -183,6 +186,7 @@ export const POST = async (req: Request) => {
 
     const nextActionLink = await saveUserData(name, email, type, body.account, amountNumber,OrgID);
 
+    console.log(transaction);
     // Create response payload
     const payload: ActionPostResponse = await createPostResponse({
       fields: {
