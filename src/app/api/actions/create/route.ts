@@ -45,13 +45,13 @@ export const GET = async (req: NextRequest) => {
             {
               type: "number",
               name: "month",
-              label: "Enter Monthly Price",
+              label: "Enter Monthly Price in SOL",
               required: true,
             },
             {
               type: "number",
               name: "year",
-              label: "Enter Yearly Price",
+              label: "Enter Yearly Price in SOL",
               required: true,
             },
           ],
