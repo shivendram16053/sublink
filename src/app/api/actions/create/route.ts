@@ -74,6 +74,7 @@ export const POST = async (req: NextRequest) => {
     await connectToDatabase();
 
     const body = (await req.json()) as { account: string; signature: string };
+    client.trackActionV2(body.account, req.url);
     const { searchParams } = new URL(req.url);
     const name = searchParams.get("name") ?? "";
     const email = searchParams.get("email") ?? "";

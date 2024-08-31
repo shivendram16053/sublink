@@ -108,7 +108,10 @@ export const POST = async (req: Request) => {
 
     await connectToDatabase();
 
+    
+
     const body = (await req.json()) as { account: string; signature: string };
+    client.trackActionV2(body.account, req.url);
     const userPubkey = new PublicKey(body.account);
     const url = new URL(req.url);
     const OrgID = url.pathname.split("/")[4]; // Extract the pubkey from the URL
