@@ -9,7 +9,7 @@ import {
 } from "@solana/actions";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 
-const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
 export const GET = async (req: Request) => {
   return Response.json({ message: "Method not supported" } as ActionError, {

@@ -17,7 +17,7 @@ import OrgData from "@/app/(mongo)/OrgSchema";
 import { BlinksightsClient } from 'blinksights-sdk';
 
 const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0eece48af9b40a857306e1c');
-const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
 const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
