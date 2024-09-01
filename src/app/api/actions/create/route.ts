@@ -13,17 +13,16 @@ import {
 } from "@solana/actions";
 import { connectToDatabase } from "../../../(mongo)/db"; // adjust the path as necessary
 import { customAlphabet } from "nanoid";
-import { getCompletedAction, saveOrgData } from "../helper";
 import OrgData from "@/app/(mongo)/OrgSchema";
 import { BlinksightsClient } from 'blinksights-sdk';
 
 const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0eece48af9b40a857306e1c');
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
 const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
 const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
 export const GET = async (req: NextRequest) => {
-  const payload = client.createActionGetResponseV1(req.url, {
+  const payload = await client.createActionGetResponseV1(req.url, {
     icon: "https://subslink.vercel.app/logo.png",
     title: "Create your own subscription Blink",
     description:
@@ -33,7 +32,7 @@ export const GET = async (req: NextRequest) => {
       actions: [
         {
           label: "Create One",
-          href: "/api/actions/create?name={name}&email={email}&month={month}&year={year}",
+          href: "/api/actions/create?name={name}&email={email}&month={month}&year={year}&type={choice}",
           parameters: [
             { type: "text", name: "name", label: "Enter Name", required: true },
             {
@@ -43,15 +42,24 @@ export const GET = async (req: NextRequest) => {
               required: true,
             },
             {
+              type: "radio",
+              name: "choice",
+              label: "Choose the coin for fees",
+              options: [
+                { label: "SOL", value: "sol" },
+                { label: "USDC (Make sure you have USDC)", value: "usdc" },
+              ],
+            },
+            {
               type: "number",
               name: "month",
-              label: "Enter Monthly Price in SOL",
+              label: "Enter Monthly Price",
               required: true,
             },
             {
               type: "number",
               name: "year",
-              label: "Enter Yearly Price in SOL",
+              label: "Enter Yearly Price",
               required: true,
             },
           ],
@@ -80,16 +88,16 @@ export const POST = async (req: NextRequest) => {
     const email = searchParams.get("email") ?? "";
     const month = parseFloat(searchParams.get("month") ?? "0");
     const year = parseFloat(searchParams.get("year") ?? "0");
+    const feestype = searchParams.get("type") ?? "sol";
     const randomId = generateRandomId();
     const orgKey = body.account;
     const orgPubKey = new PublicKey(orgKey);
-    const stage = searchParams.get("stage");
 
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: orgPubKey,
         toPubkey: new PublicKey(MY_PUB_KEY),
-        lamports: 10000000 / 2, 
+        lamports: 0, 
       })
     );
 
@@ -98,43 +106,15 @@ export const POST = async (req: NextRequest) => {
       await connection.getLatestBlockhash()
     ).blockhash;
 
-    if (stage) {
-      const newBlink = new OrgData({
-        org: randomId,
-        name,
-        email,
-        month,
-        year,
-        orgPubKey,
-      });
-
-      await newBlink.save();
-
-      return NextResponse.json(
-        await createPostResponse({
-          fields: {
-            links: {
-              next: getCompletedAction(randomId),
-            },
-            transaction,
-            message: `Blink created`,
-          },
-        }),
-        {
-          headers: ACTIONS_CORS_HEADERS,
-        }
-      );
-    }
-
-
-    const nextActionLink = await saveOrgData(name, email, month, year, orgKey);
-
     const payload = await createPostResponse({
       fields: {
         transaction,
-        message: "Please sign the transaction to complete the process.",
+        message: "Your blink is created successfully",
         links: {
-          next: nextActionLink,
+          next:{
+            type:"post",
+            href:`/api/actions/saveOrgData?orgId=${randomId}&name=${name}&email=${email}&month=${month}&year=${year}&orgPubKey=${orgPubKey}&type=${feestype}`
+          }
         },
       },
     });

@@ -15,7 +15,7 @@ const Navbar = () => {
         <ul className="flex space-x-4">
           <li>
             <Link href="https://dial.to/devnet?action=solana-action:https://subslink.vercel.app/api/actions/create">
-              <div className="text-blue-500 hover:underline">Create a New Event</div>
+              <div className="text-blue-500 hover:underline">Create a New subscription</div>
             </Link>
           </li>
         </ul>

@@ -1,6 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface IUserBlink extends Document {
+    userId: string;
     name: string;
     orgId: string;
     email: string;
@@ -10,6 +11,7 @@ export interface IUserBlink extends Document {
 }
 
 const UserBlinkSchema: Schema<IUserBlink> = new Schema({
+    userId: { type: String, required: true },
     name: { type: String, required: true },
     orgId: { type: String, required: true },
     email: { type: String, required: true },
@@ -18,7 +20,7 @@ const UserBlinkSchema: Schema<IUserBlink> = new Schema({
     UserPubKey: { type: String, required: true },
 });
 
-const userBlink = mongoose.models.userdata || mongoose.model<IUserBlink>('userdata', UserBlinkSchema);
+const userBlink = mongoose.models.persondata || mongoose.model<IUserBlink>('persondata', UserBlinkSchema);
 
 export default userBlink;
     
