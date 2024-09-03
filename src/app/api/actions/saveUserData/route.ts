@@ -9,14 +9,26 @@ import {
   ACTIONS_CORS_HEADERS,
 } from "@solana/actions";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import nodemailer from "nodemailer";
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
+
 export const GET = async (req: Request) => {
-  return Response.json({ message: "Method not supported" } as ActionError, {
-    status: 403,
-    headers: ACTIONS_CORS_HEADERS,
-  });
+  return new Response(
+    JSON.stringify({ message: "Method not supported" } as ActionError),
+    {
+      status: 403,
+      headers: ACTIONS_CORS_HEADERS,
+    }
+  );
 };
 
 export const OPTIONS = GET;
@@ -35,7 +47,7 @@ export const POST = async (req: Request) => {
     const userPubKey = url.searchParams.get("userPubKey") ?? "";
     const planType = url.searchParams.get("plantype") ?? "";
 
-    const orgdetails = await OrgData.findOne({org:orgId});
+    const orgdetails = await OrgData.findOne({ org: orgId });
 
     let signature: string;
     try {
@@ -58,7 +70,7 @@ export const POST = async (req: Request) => {
           let actionError: ActionError = {
             message: "Signature not confirmed or finalized",
           };
-          return Response.json(actionError, {
+          return new Response(JSON.stringify(actionError), {
             status: 400,
             headers: ACTIONS_CORS_HEADERS,
           });
@@ -71,8 +83,8 @@ export const POST = async (req: Request) => {
         email,
         orgId,
         amount,
-        duration:type,
-        UserPubKey:userPubKey,
+        duration: type,
+        UserPubKey: userPubKey,
       });
 
       await newBlink.save();
@@ -82,25 +94,39 @@ export const POST = async (req: Request) => {
         "confirmed"
       );
 
-      const blinkUrl = `https://subslink.vercel.app/pay/${orgId}`;
-      const twitterShareUrl = `https://twitter.com/intent/tweet?text=Check%20out%20my%20new%20Blink%20link:%20${encodeURIComponent(
-        blinkUrl
-      )}`;
+      // Send an email notification to the user
+      await transporter.sendMail({
+        from: `"SUBSLINK" <${process.env.EMAIL}>`,
+        to: email,
+        subject: `Subscription Purchase Confirmation`,
+        text: `Hello ${name},
 
-      // Generate the QR code URL for the Twitter share link
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-        twitterShareUrl
-      )}`;
+Thank you for your purchase!
+
+We are pleased to confirm that your subscription to ${orgdetails.name} has been successfully activated. Here are the details of your subscription:
+
+Plan Type : ${planType}
+Amount Paid : ${amount} ${orgdetails.feesType}
+
+You will get daily updates and alpha for the project on this email. If you have any questions or need assistance, feel free to reach out to us.
+
+Best regards,
+The SUBSLINK Team
+
+SUBSLINK - Simplifying Subscriptions for Everyone
+Website: ${process.env.BASE_URL}
+Support: subslink22@gmail.com`,
+      });
 
       const payload: CompletedAction = {
         type: "completed",
-        title: "Subscription buy completed",
+        title: "Subscription Purchase Completed",
         icon: 'https://subslink.vercel.app/logo.png',
         label: "Subscription Bought",
-        description: `You bought  ${planType} of ${orgdetails.name}`,
+        description: `You have successfully purchased ${planType} for ${orgdetails.name}.`,
       };
 
-      return Response.json(payload, {
+      return new Response(JSON.stringify(payload), {
         headers: ACTIONS_CORS_HEADERS,
       });
     } catch (err) {
@@ -112,7 +138,7 @@ export const POST = async (req: Request) => {
     console.error("General error:", err);
     let actionError: ActionError = { message: "An unknown error occurred" };
     if (typeof err == "string") actionError.message = err;
-    return Response.json(actionError, {
+    return new Response(JSON.stringify(actionError), {
       status: 400,
       headers: ACTIONS_CORS_HEADERS,
     });

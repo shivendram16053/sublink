@@ -5,6 +5,7 @@ import {
   SystemProgram,
   Connection,
   clusterApiUrl,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import {
   ACTIONS_CORS_HEADERS,
@@ -18,12 +19,12 @@ import { BlinksightsClient } from 'blinksights-sdk';
 
 const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0eece48af9b40a857306e1c');
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-const MY_PUB_KEY = "6rSrLGuhPEpxGqmbZzV1ZttwtLXzGx8V2WEACXd4qnVH";
-const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
+const MY_PUB_KEY = `${process.env.PUBLIC_KEY}`;
+
 
 export const GET = async (req: NextRequest) => {
   const payload = await client.createActionGetResponseV1(req.url, {
-    icon: "https://subslink.vercel.app/logo.png",
+    icon: `${process.env.BASE_URL}/logo.png`,
     title: "Create your own subscription Blink",
     description:
       "Enter the details of your organisation/business/project to create a blink",
@@ -32,7 +33,7 @@ export const GET = async (req: NextRequest) => {
       actions: [
         {
           label: "Create One",
-          href: "/api/actions/create?name={name}&email={email}&month={month}&year={year}&type={choice}",
+          href: `/api/actions/create?name={name}&email={email}&website={website}&discord={discord}&twitter={twitter}&choice={choice}&month={month}&year={year}`,
           parameters: [
             { type: "text", name: "name", label: "Enter Name", required: true },
             {
@@ -40,6 +41,21 @@ export const GET = async (req: NextRequest) => {
               name: "email",
               label: "Enter Email",
               required: true,
+            },
+            {
+              type: "url",
+              name: "website",
+              label: "Enter Your website",
+            },
+            {
+              type: "url",
+              name: "discord",
+              label: "Enter Your discord",
+            },
+            {
+              type: "url",
+              name: "twitter",
+              label: "Enter Your twitter",
             },
             {
               type: "radio",
@@ -83,13 +99,16 @@ export const POST = async (req: NextRequest) => {
 
     const body = (await req.json()) as { account: string; signature: string };
     client.trackActionV2(body.account, req.url);
+
     const { searchParams } = new URL(req.url);
     const name = searchParams.get("name") ?? "";
     const email = searchParams.get("email") ?? "";
+    const website = searchParams.get("website") ?? "";
+    const discord = searchParams.get("discord") ?? "";
+    const twitter = searchParams.get("twitter") ?? "";
     const month = parseFloat(searchParams.get("month") ?? "0");
     const year = parseFloat(searchParams.get("year") ?? "0");
-    const feestype = searchParams.get("type") ?? "sol";
-    const randomId = generateRandomId();
+    const feestype = searchParams.get("choice") ?? "sol";
     const orgKey = body.account;
     const orgPubKey = new PublicKey(orgKey);
 
@@ -97,7 +116,7 @@ export const POST = async (req: NextRequest) => {
       SystemProgram.transfer({
         fromPubkey: orgPubKey,
         toPubkey: new PublicKey(MY_PUB_KEY),
-        lamports: 0, 
+        lamports: 0.1 * LAMPORTS_PER_SOL, 
       })
     );
 
@@ -109,12 +128,12 @@ export const POST = async (req: NextRequest) => {
     const payload = await createPostResponse({
       fields: {
         transaction,
-        message: "Your blink is created successfully",
+        message: "",
         links: {
-          next:{
-            type:"post",
-            href:`/api/actions/saveOrgData?orgId=${randomId}&name=${name}&email=${email}&month=${month}&year=${year}&orgPubKey=${orgPubKey}&type=${feestype}`
-          }
+          next: {
+            type: "post",
+            href: `/api/actions/saveOrgData?name=${name}&email=${email}&website=${website}&discord=${discord}&twitter=${twitter}&month=${month}&year=${year}&orgPubKey=${orgPubKey}&feesType=${feestype}`,
+          },
         },
       },
     });

@@ -21,13 +21,15 @@ export default function Home() {
             Follow on Twitter
           </button>
           </Link>
-          <Link href="https://dial.to/devnet?action=solana-action:https://subslink.vercel.app/api/actions/create">
+          <Link href={`https://dial.to/devnet?action=solana-action:${process.env.BASE_URL}/api/actions/create`}>
           <button className="px-6 py-3 bg-gradient-to-r from-blue-600  to-cyan-500 rounded-full text-lg">
             Create Subscription
           </button>
           </Link>
         </div>
       </section>
+
+      
     </main>
   );
 }

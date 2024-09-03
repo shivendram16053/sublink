@@ -8,6 +8,7 @@ export interface IUserBlink extends Document {
     amount: number,
     duration:'month' | 'year',
     UserPubKey: string;
+    createdAt : Date;
 }
 
 const UserBlinkSchema: Schema<IUserBlink> = new Schema({
@@ -18,9 +19,11 @@ const UserBlinkSchema: Schema<IUserBlink> = new Schema({
     amount :{type:Number,required:true},
     duration:{type:String, enum:['month' , 'year'],required:true},
     UserPubKey: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },  // Optional: Track creation time
+
 });
 
-const userBlink = mongoose.models.persondata || mongoose.model<IUserBlink>('persondata', UserBlinkSchema);
+const userBlink = mongoose.models.Userr || mongoose.model<IUserBlink>('Userr', UserBlinkSchema);
 
 export default userBlink;
     

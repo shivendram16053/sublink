@@ -43,13 +43,16 @@ export const GET = async (req: Request) => {
       return new Response("Organization not found", { status: 404 });
     }
 
-    const paytype = orgDetails.type === "sol"? "SOL":"USDC";
+    const paytype = orgDetails.feesType === "sol"? "SOL":"USDC";
 
     // Create the response payload
     const payload = await client.createActionGetResponseV1(req.url, {
-      icon: "https://subslink.vercel.app/logo.png",
+      icon: `${process.env.BASE_URL}/logo.png`,
       title: `Subscribe to ${orgDetails.name}`,
-      description: `Subscribe to ${orgDetails.name} on Solana.`,
+      description: `Subscribe to ${orgDetails.name} for Updates, Alphas, Newsletters and exclusive content.
+      Website : ${orgDetails.website}
+      Twitter : ${orgDetails.twitter}
+      Discord : ${orgDetails.discord}`,
       label: "Subscribe Now",
       links: {
         actions: [
@@ -148,7 +151,7 @@ export const POST = async (req: Request) => {
     let transaction;
 
     // Create the transaction based on organization type
-    if (orgDetails.type === "sol") {
+    if (orgDetails.feesType === "sol") {
       transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: userPubkey,
@@ -239,7 +242,7 @@ export const POST = async (req: Request) => {
     const payload: ActionPostResponse = await createPostResponse({
       fields: {
         transaction,
-        message: "Subscription Done",
+        message: "",
         links: {
           next: {
             type: 'post',
