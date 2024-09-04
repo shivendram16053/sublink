@@ -9,9 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dialectlabs/blinks": "^0.9.3",
     "@solana/actions": "^1.6.4",
     "@solana/actions-spec": "^2.2.2",
     "@solana/spl-token": "^0.4.8",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/web3.js": "^1.95.3",
     "blinksights-sdk": "^1.0.13",
     "mongodb": "^6.8.0",

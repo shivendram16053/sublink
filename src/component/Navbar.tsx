@@ -1,24 +1,38 @@
-import Image from 'next/image';
+'use client';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 
 const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <nav className="navbar">
-      <Link href="/">
-        <>
-          <Image src="/logo.png" width={80} height={80} alt="logo" />
-        </>
-      </Link>
-
-      <div className="nav-item">
-        <ul className="flex space-x-4">
-          <li>
-            <Link href={`https://dial.to/devnet?action=solana-action:${process.env.BASE_URL}/api/actions/create`}>
-              <div className="text-blue-500 hover:underline">Create a New subscription</div>
-            </Link>
-          </li>
-        </ul>
+      <div className="navbar-container">
+        <div className="navbar-logo">
+          <Link href="/">
+            <p>SubsLink</p>
+          </Link>
+        </div>
+        <div className="hamburger" onClick={toggleMenu}>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <div className={`navbar-menu ${isMenuOpen ? 'active' : 'hidden'}`}>
+          <Link href="/update">
+            <p>Update Subscription</p>
+          </Link>
+          <Link href="/send-email">
+            <p>Send Email</p>
+          </Link>
+          <Link href="/view-analytics">
+            <p>View Analytics</p>
+          </Link>
+        </div>
       </div>
     </nav>
   );
