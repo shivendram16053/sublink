@@ -8,7 +8,7 @@ import {
   CompletedAction,
   ACTIONS_CORS_HEADERS,
 } from "@solana/actions";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import { clusterApiUrl, Connection } from "@solana/web3.js";
 import nodemailer from "nodemailer";
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -77,6 +77,7 @@ export const POST = async (req: Request) => {
         }
       }
 
+      // Store data directly in DB
       const newBlink = new userBlink({
         userId,
         name,
@@ -93,6 +94,14 @@ export const POST = async (req: Request) => {
         signature,
         "confirmed"
       );
+
+      const payload: CompletedAction = {
+        type: "completed",
+        title: "Subscription Purchase Completed",
+        icon: 'https://subslink.vercel.app/logo.png',
+        label: "Subscription Bought",
+        description: `You have successfully purchased ${planType} for ${orgdetails.name}.`,
+      };
 
       // Send an email notification to the user
       await transporter.sendMail({
@@ -117,14 +126,6 @@ SUBSLINK - Simplifying Subscriptions for Everyone
 Website: ${process.env.BASE_URL}
 Support: subslink22@gmail.com`,
       });
-
-      const payload: CompletedAction = {
-        type: "completed",
-        title: "Subscription Purchase Completed",
-        icon: 'https://subslink.vercel.app/logo.png',
-        label: "Subscription Bought",
-        description: `You have successfully purchased ${planType} for ${orgdetails.name}.`,
-      };
 
       return new Response(JSON.stringify(payload), {
         headers: ACTIONS_CORS_HEADERS,
