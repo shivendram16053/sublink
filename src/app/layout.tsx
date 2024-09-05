@@ -6,7 +6,7 @@ import Navbar from "@/component/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SubLink",
+  title: "SubsLink",
   description: "A Blink made to make subscription model more easy to use",
 };
 
@@ -17,9 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Navbar/>
-        {children}
+        <body className={inter.className}>
+          <Navbar />
+          {children}
         </body>
     </html>
   );

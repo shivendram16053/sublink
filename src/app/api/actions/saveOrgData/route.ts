@@ -8,6 +8,7 @@ import {
   ACTIONS_CORS_HEADERS,
 } from "@solana/actions";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import { randomBytes } from "crypto";
 import { customAlphabet } from "nanoid";
 import nodemailer from "nodemailer";
 const generateRandomId = customAlphabet(`${process.env.SECRET_KEY}`, 10);
@@ -76,7 +77,7 @@ export const POST = async (req: Request) => {
         }
       }
       const org = generateRandomId();
-      const orgPrivateId = generateRandomId();
+      const orgPrivateId = randomBytes(16).toString('hex');
 
 
       const newOrgData = new OrgData({
@@ -100,7 +101,7 @@ export const POST = async (req: Request) => {
         "confirmed"
       );
 
-      const blinkUrl = `${process.env.BASE_URL}/pay/${org}`;
+      const blinkUrl = `https://dial.to/devnet?action=solana-action:${process.env.BASE_URL}/pay/${org}`;
       const twitterShareUrl = `https://twitter.com/intent/tweet?text=Check%20out%20my%20new%20Blink%20link:%20${encodeURIComponent(
         blinkUrl
       )}`;
@@ -140,7 +141,7 @@ Support: subslink22@gmail.com`,
         icon: qrCodeUrl,
         label: "Subscription Created",
         description: `Your Blink URL to share is 
-        ${process.env.BASE_URL}/pay/${org} 
+        ${blinkUrl}
         or just scan the QR code to share . You can check your email too.`,
       };
 

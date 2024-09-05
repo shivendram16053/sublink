@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center text-white bg-gray-900">
       {/* Hero Section */}
-      <section className="h-screen flex flex-col justify-center items-center text-center px-4 sm:px-6 mt-10 bg-gray-900">
+      <section className="h-screen flex flex-col mt-[-30px] justify-center items-center text-center px-4 sm:px-6 bg-gray-900">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 text-blue-100">
           Empower Direct Subscriptions with
         </h1>

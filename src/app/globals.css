@@ -18,6 +18,10 @@
 
 body {
   background-color: #111827;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 @layer utilities {
@@ -29,18 +33,16 @@ body {
 /* navbar.css */
 .navbar {
   background-color: transparent;
-  position: absolute;
-  margin-top: 30px;
-  left: 10%;
-  padding:1rem;
+  padding: 1rem;
   box-shadow: 0px 0px 10px rgb(60, 60, 72);
-  width: 80%;
   border-radius: 20px;
+  z-index: 10;
+  width: 80%;
+  max-width: 1200px; /* Restricts maximum width */
+  margin: 20px auto; /* Centers horizontally */
 }
 
 .navbar-container {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -98,18 +100,15 @@ body {
   display: flex;
 }
 
-.navbar-menu a:hover{
+.navbar-menu a:hover {
   color: gray;
 }
-
 
 @media (max-width: 768px) {
   .navbar-menu {
     display: none;
-    position: absolute;
     top: 60px;
     right: 0;
-    background-color: #1a202c;
     flex-direction: column;
     border-radius: 20px;
     width: 100%;
@@ -129,4 +128,11 @@ body {
   .navbar-links {
     display: none;
   }
+}
+
+.blink.x-dark {
+  --blink-bg-primary: #202327;
+  --blink-button: #1d9bf0;
+  --blink-button-disabled: #2f3336;
+  /* Add other customizations here */
 }

@@ -14,7 +14,7 @@ const Navbar = () => {
       <div className="navbar-container">
         <div className="navbar-logo">
           <Link href="/">
-            <p>SubsLink</p>
+            <p className="text-2xl font-bold">SubsLink</p>
           </Link>
         </div>
         <div className="hamburger" onClick={toggleMenu}>
@@ -24,13 +24,13 @@ const Navbar = () => {
         </div>
         <div className={`navbar-menu ${isMenuOpen ? 'active' : 'hidden'}`}>
           <Link href="/update">
-            <p>Update Subscription</p>
+            <p className="navbar-link">Update Subscription</p>
           </Link>
           <Link href="/send-email">
-            <p>Send Email</p>
+            <p className="navbar-link">Send Email</p>
           </Link>
           <Link href="/view-analytics">
-            <p>View Analytics</p>
+            <p className="navbar-link">View Analytics</p>
           </Link>
         </div>
       </div>
