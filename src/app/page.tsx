@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
-import email from "../utils/Images/email.png"
+import Image from 'next/image';  // Import Image from next/image
 
 export default function Home() {
   return (
@@ -32,11 +32,10 @@ export default function Home() {
       </section>
 
       <section className="py-16 bg-gray-900 w-[80%] flex flex-col md:flex-row items-center justify-center text-center md:text-left px-4 sm:px-6">
-      <div className="md:w-1/3">
-          <img src="/updates.png" alt="Analytics Dashboard" className="mx-auto" />
+        <div className="md:w-1/3">
+          <Image src="/updates.png" alt="Analytics Dashboard" width={400} height={300} className="mx-auto" /> {/* Use Image */}
         </div>
-        <div className="md:w-1/2  md:pr-8 mb-8 md:mb-0 order-first md:order-last md:pl-10">
-        
+        <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0 order-first md:order-last md:pl-10">
           <h2 className="text-4xl sm:text-2xl md:text-5xl font-bold text-blue-100 mb-4">
             Update Your Subscription
           </h2>
@@ -44,12 +43,11 @@ export default function Home() {
             Want to change you pre-existing subscription? No worries just enter your new details and in one click your subscription will be updated.
           </p>
           <Link href="/update">
-            <button className="px-1 py-2 sm:px-4 sm:py-2  bg-gradient-to-r from-blue-600 via-cyan-500 to-violet-600 rounded-full text-lg sm:text-xl">
+            <button className="px-1 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-600 via-cyan-500 to-violet-600 rounded-full text-lg sm:text-xl">
               Update Subscription
             </button>
           </Link>
         </div>
-        
       </section>
 
       {/* Email Feature Section */}
@@ -68,30 +66,28 @@ export default function Home() {
           </Link>
         </div>
         <div className="md:w-1/3">
-          <img src="/email.png" alt="Email Feature" className="mx-auto" />
+          <Image src="/email.png" alt="Email Feature" width={400} height={300} className="mx-auto" /> {/* Use Image */}
         </div>
       </section>
 
       {/* Analytics Section */}
       <section className="py-16 bg-gray-900 w-[80%] flex flex-col md:flex-row items-center justify-center text-center md:text-left px-4 sm:px-6">
-      <div className="md:w-1/3">
-          <img src="/analytics.png" alt="Analytics Dashboard" className="mx-auto" />
+        <div className="md:w-1/3">
+          <Image src="/analytics.png" alt="Analytics Dashboard" width={400} height={300} className="mx-auto" /> {/* Use Image */}
         </div>
-        <div className="md:w-1/2  md:pr-8 mb-8 md:mb-0 order-first md:order-last md:pl-10">
-        
+        <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0 order-first md:order-last md:pl-10">
           <h2 className="text-4xl sm:text-2xl md:text-5xl font-bold text-blue-100 mb-4">
             Monitor Your Performance
           </h2>
           <p className="text-m sm:text-lg md:text-xl mb-4 text-gray-400">
-            Gain insights into your subscription activity with our comprehensive analytics dashboard. Check how your users are reacting to your emails
+            Gain insights into your subscription activity with our comprehensive analytics dashboard. Check how your users are reacting to your emails.
           </p>
           <Link href="/view-analytics">
-            <button className="px-1 py-2 sm:px-4 sm:py-2  bg-gradient-to-r from-blue-600 via-cyan-500 to-violet-600 rounded-full text-lg sm:text-xl">
+            <button className="px-1 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-600 via-cyan-500 to-violet-600 rounded-full text-lg sm:text-xl">
               View Analytics
             </button>
           </Link>
         </div>
-        
       </section>
 
       {/* Call to Action Section */}

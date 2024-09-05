@@ -111,7 +111,7 @@ const SendEmailPage = () => {
               htmlFor="uniqueId"
               className="block text-lg font-medium mb-2"
             >
-              Enter Project's Unique ID (You received this through email)
+              Enter Project&#39;s Unique ID (You received this through email)
             </label>
             <input
               id="uniqueId"

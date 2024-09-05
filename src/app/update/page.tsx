@@ -124,7 +124,7 @@ const UpdatePage = () => {
               htmlFor="uniqueId"
               className="block text-lg font-medium mb-2"
             >
-              Enter Project's Unique ID
+              Enter Project&#39;s Unique ID
             </label>
             <input
               id="uniqueId"
