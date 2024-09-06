@@ -18,7 +18,7 @@ import OrgData from "@/app/(mongo)/OrgSchema";
 import { BlinksightsClient } from 'blinksights-sdk';
 
 const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0eece48af9b40a857306e1c');
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
 const MY_PUB_KEY = `${process.env.PUBLIC_KEY}`;
 
 
@@ -116,7 +116,7 @@ export const POST = async (req: NextRequest) => {
       SystemProgram.transfer({
         fromPubkey: orgPubKey,
         toPubkey: new PublicKey(MY_PUB_KEY),
-        lamports: 0.1 * LAMPORTS_PER_SOL, 
+        lamports: 0.01 * LAMPORTS_PER_SOL, 
       })
     );
 

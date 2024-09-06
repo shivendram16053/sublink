@@ -26,8 +26,7 @@ const client = new BlinksightsClient('7b49ec4afba592ae347ee97a3d929532d2e0190be0
 // Generate a random ID
 const generateRandomId = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
-// Establish connection to Solana Devnet
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
 
 export const GET = async (req: Request) => {
   try {

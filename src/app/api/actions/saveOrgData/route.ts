@@ -12,7 +12,7 @@ import { randomBytes } from "crypto";
 import { customAlphabet } from "nanoid";
 import nodemailer from "nodemailer";
 const generateRandomId = customAlphabet(`${process.env.SECRET_KEY}`, 10);
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -101,7 +101,7 @@ export const POST = async (req: Request) => {
         "confirmed"
       );
 
-      const blinkUrl = `https://dial.to/devnet?action=solana-action:${process.env.BASE_URL}/api/actions/pay/${org}`;
+      const blinkUrl = `https://dial.to/?action=solana-action:${process.env.BASE_URL}/api/actions/pay/${org}`;
       const twitterShareUrl = `https://twitter.com/intent/tweet?text=Check%20out%20my%20new%20Blink%20link:%20${encodeURIComponent(
         blinkUrl
       )}`;
