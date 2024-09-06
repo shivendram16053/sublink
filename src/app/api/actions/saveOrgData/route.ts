@@ -101,7 +101,7 @@ export const POST = async (req: Request) => {
         "confirmed"
       );
 
-      const blinkUrl = `https://dial.to/devnet?action=solana-action:${process.env.BASE_URL}/pay/${org}`;
+      const blinkUrl = `https://dial.to/devnet?action=solana-action:${process.env.BASE_URL}/api/actions/pay/${org}`;
       const twitterShareUrl = `https://twitter.com/intent/tweet?text=Check%20out%20my%20new%20Blink%20link:%20${encodeURIComponent(
         blinkUrl
       )}`;
@@ -124,6 +124,7 @@ We are excited to inform you that your subscription Blink has been created succe
 
 Your Private ID : ${orgPrivateId} . This will be used to send information,message and contents to your users so keep it safe.
 Blink URL: ${blinkUrl}
+To send emails to your subscriber :- ${process.env.BASE_URL}/send-email
 
 We hope you enjoy the ease and flexibility that SUBSLINK offers. If you have any questions or need assistance, feel free to reach out to us.
 
@@ -142,7 +143,7 @@ Support: subslink22@gmail.com`,
         label: "Subscription Created",
         description: `Your Blink URL to share is 
         ${blinkUrl}
-        or just scan the QR code to share . You can check your email too.`,
+        or just scan the QR code to share . Check Your email for more info.`,
       };
 
       return new Response(JSON.stringify(payload), {
