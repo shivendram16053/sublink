@@ -23,7 +23,7 @@ export default function Home() {
               Follow on Twitter
             </button>
           </Link>
-          <Link href={`https://dial.to/?action=solana-action:${process.env.BASE_URL}/api/actions/create`}>
+          <Link href={`https://x.com/subs_link/status/1832037416724468058`}>
             <button className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full text-base sm:text-lg">
               Create Subscription
             </button>
@@ -98,7 +98,7 @@ export default function Home() {
         <p className="text-lg sm:text-xl mb-8 text-gray-200">
           Join the future of subscriptions on Solana.
         </p>
-        <Link href={`https://dial.to/?action=solana-action:${process.env.BASE_URL}/api/actions/create`}>
+        <Link href={`https://x.com/subs_link/status/1832037416724468058`}>
           <button className="px-2 py-1 sm:px-8 sm:py-4 bg-white text-blue-600 font-semibold rounded-full text-lg sm:text-xl shadow-lg">
             Create Your Subscription Now
           </button>
