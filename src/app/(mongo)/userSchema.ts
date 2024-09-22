@@ -4,6 +4,7 @@ export interface IUserBlink extends Document {
     userId: string;
     name: string;
     orgId: string;
+    orgPrivateId: string;
     email: string;
     amount: number,
     duration:'month' | 'year',
@@ -15,6 +16,7 @@ const UserBlinkSchema: Schema<IUserBlink> = new Schema({
     userId: { type: String, required: true },
     name: { type: String, required: true },
     orgId: { type: String, required: true },
+    orgPrivateId: { type: String, required: true },
     email: { type: String, required: true },
     amount :{type:Number,required:true},
     duration:{type:String, enum:['month' , 'year'],required:true},

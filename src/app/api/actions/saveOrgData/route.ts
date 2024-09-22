@@ -1,7 +1,6 @@
 import { connectToDatabase } from "@/app/(mongo)/db";
 import OrgData from "@/app/(mongo)/OrgSchema";
 import {
-  createActionHeaders,
   NextActionPostRequest,
   ActionError,
   CompletedAction,
@@ -22,11 +21,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const GET = async (req: Request) => {
-  return new Response(
-    JSON.stringify({ message: "Method not supported" } as ActionError),
+export const GET = async () => {
+  return Response.json(
+    { message: "Method not supported" },
     {
-      status: 403,
       headers: ACTIONS_CORS_HEADERS,
     }
   );
